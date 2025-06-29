@@ -92,7 +92,7 @@ function App() {
 
         {/* Loading */}
         {
-          loading && <p>Loading data…</p>
+          loading && <p>Loading data...</p>
         }
 
         {

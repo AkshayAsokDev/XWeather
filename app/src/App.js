@@ -81,6 +81,7 @@ function App() {
           onChange={(e) => {
             setSearch(e.target.value);
           }}
+          type='text'
           />
 
           <button className='button' 

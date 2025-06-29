@@ -1,15 +1,15 @@
-import logo from './logo.svg';
+
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 
-function Card(title, value) {
+function Card({title, value}) {
 
   return (
-    <div className='card'>
+    <div className='weather-card'>
 
-          <h3>Title</h3>
-          <p>Value</p>
+      <h3>{title}</h3>
+      <p>{value}</p>
 
     </div>
   )
@@ -17,43 +17,94 @@ function Card(title, value) {
 }
 
 const endpoint = "https://api.weatherapi.com/v1/current.json?Key=6b83308e80864700a8d155116252806&q=";
+const tempKey = ["Temperature", "Humidity", "Condition", "Wind Speed"];
+
 
 function App() {
 
-  const [weatherData, setWeatherData] = useState({});
+  const [weatherData, setWeatherData] = useState([]);
   const [search, setSearch] = useState("");
   const [display, setDisplay] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const fetchData = () => {
 
+    setDisplay(false);
+
     if (search) {
+
+      setLoading(true);
 
       const url = endpoint + search;
       fetch(url)
-      .then((data) => data.json())
+      .then((data) => {
+
+        // error handling
+        if(!data.ok){
+          throw new Error(data.error.message)
+        }
+
+        return data.json()
+      })
       .then((data) => {
         console.log("data >> ", data);
-        setWeatherData(data);
+        
+        const temp = [];
+        temp.push(`${data.current.temp_c} °C`);
+        temp.push(`${data.current.humidity} %`);
+        temp.push(`${data.current.condition.text}`)
+        temp.push(`${data.current.wind_kph} kph`);
+        console.log("temp >>", temp);
+
+        setWeatherData(temp);
+
       })
       .catch(error => {
         console.error("Error while fetching data : ", error);
-        alert("Failed to fetch weather data");
+        window.alert("Failed to fetch weather data");
+      })
+      .finally(() => {
+        setLoading(false);
+        setDisplay(true);
       })
     }
+
   }
 
   return (
     <div className="App">
 
-        <input placeholder='Enter the city'
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-        }}
-        />
-        <button className='button' 
-        onClick={fetchData}
-        >Search</button>
+        <div>
+
+          <input placeholder='Enter the city'
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+          }}
+          />
+
+          <button className='button' 
+          onClick={fetchData}
+          >Search</button>
+
+        </div>
+
+        {/* Loading */}
+        {
+          loading && <p>Loading data…</p>
+        }
+
+        {
+          display && (
+            <div className="weather-cards" >
+
+              {
+                weatherData.map((value, index) => <Card title={tempKey[index]} value={value} key={index} />)
+              }
+
+            </div>
+          )
+        }
 
         
 
